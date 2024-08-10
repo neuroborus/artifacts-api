@@ -1,3 +1,3 @@
 import { Character } from '../character';
 
-export interface GetCharacterResponse extends Character {}
+export type GetCharacterResponse = Character;

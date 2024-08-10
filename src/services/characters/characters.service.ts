@@ -1,7 +1,7 @@
-import { setTimeout } from "node:timers/promises";
-import { Injectable } from '@nestjs/common';
+import { setTimeout } from 'node:timers/promises';
+import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger } from '@nestjs/common';
 import { TasksQueueService } from 'tasks-mad-queue';
-import { PREFIXES } from '@/config';
 import { ActionsProcessor } from '@/processors/actions-processors';
 import { DataProcessor } from '@/processors/data-processors';
 import {
@@ -11,15 +11,19 @@ import {
   GetCharacterResponse,
   MoveResponse,
 } from '@/entities/artifacts';
-import * as actionsCalls from '@/calls/actions';
-import * as dataCalls from '@/calls/data';
+import { ActionsCalls } from '@/calls/actions';
+import { DataCalls } from '@/calls/data';
 
 @Injectable()
 export class CharactersService {
+  private readonly logger = new Logger(CharactersService.name);
   constructor(
     private readonly characterQueues: Record<string, TasksQueueService>,
     private readonly actionsProcessor: ActionsProcessor,
     private readonly dataProcessor: DataProcessor,
+    private readonly actionsCalls: ActionsCalls,
+    private readonly dataCalls: DataCalls,
+    private readonly config: ConfigService,
   ) {}
 
   private async loopAction<T extends ActionResponse>(
@@ -32,8 +36,10 @@ export class CharactersService {
     const iteration = async (): Promise<boolean> => {
       const result = await this.actionsProcessor.process<T | null>(call);
       if (!result) {
-        console.warn(
-          `${PREFIXES[character]} -> exit from <${tag}> after [${counter}] iterations`,
+        this.logger.warn(
+          `${
+            this.config.getOrThrow('account.prefixes')[character]
+          } -> exit from <${tag}> after [${counter}] iterations`,
         );
         return false;
       }
@@ -49,8 +55,10 @@ export class CharactersService {
         iteration,
       );
     }
-    console.info(
-      `${PREFIXES[character]} -> donw with <${tag}> after [${counter}] iterations`,
+    this.logger.log(
+      `${
+        this.config.getOrThrow('account.prefixes')[character]
+      } -> donw with <${tag}> after [${counter}] iterations`,
     );
   }
 
@@ -78,7 +86,7 @@ export class CharactersService {
   ): Promise<MoveResponse | null> {
     return this.enqueueAction(
       character,
-      async () => await actionsCalls.move(character, posX, posY),
+      async () => await this.actionsCalls.move(character, posX, posY),
     );
   }
   depositItem(
@@ -89,7 +97,7 @@ export class CharactersService {
     return this.enqueueAction(
       character,
       async () =>
-        await actionsCalls.depositItem(character, itemCode, itemQuantity),
+        await this.actionsCalls.depositItem(character, itemCode, itemQuantity),
     );
   }
   async fight(
@@ -99,7 +107,7 @@ export class CharactersService {
     if (loopIterations !== undefined) {
       await this.loopAction(
         character,
-        async () => await actionsCalls.fight(character),
+        async () => await this.actionsCalls.fight(character),
         'fight' + Date.now(),
         loopIterations,
       );
@@ -107,7 +115,7 @@ export class CharactersService {
     }
     return this.enqueueAction(
       character,
-      async () => await actionsCalls.fight(character),
+      async () => await this.actionsCalls.fight(character),
     );
   }
 
@@ -115,7 +123,7 @@ export class CharactersService {
 
   characterData(character: string): Promise<GetCharacterResponse | null> {
     return this.dataProcessor.process(
-      async () => await dataCalls.character(character),
+      async () => await this.dataCalls.character(character),
     );
   }
 }

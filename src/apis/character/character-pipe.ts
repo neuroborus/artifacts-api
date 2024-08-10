@@ -4,14 +4,18 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
-import { CHARACTERS } from '@/config';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CharacterPipe implements PipeTransform<string> {
+  private readonly characters: string[];
+
+  constructor(private readonly configService: ConfigService) {
+    this.characters =
+      this.configService.getOrThrow<string[]>('account.characters');
+  }
   transform(character: string, metadata: ArgumentMetadata) {
-    console.log(JSON.stringify(CHARACTERS));
-    console.log(character);
-    if (CHARACTERS.includes(character)) {
+    if (this.characters.includes(character)) {
       return character;
     }
 
