@@ -24,17 +24,25 @@ export class ActionsCalls {
     const options = {
       method: 'POST',
       headers: this.config.getOrThrow('requests.headers'),
-      body: `{"code":${itemCode},"quantity":${itemQuantity}}`,
+      body: `{"code":"${itemCode}","quantity":${itemQuantity}}`,
     };
 
     try {
       const response = await fetch(url, options);
-      const { data } = await response.json();
-      this.logger.log(
-        this.config.getOrThrow('account.prefixes')[character] +
-          `deposited items to bank (${itemCode} [${itemQuantity}])`,
-      );
-      return data as DepositItemResponse;
+
+      if (response.ok) {
+        const { data } = await response.json();
+        this.logger.log(
+          this.config.getOrThrow('account.prefixes')[character] +
+            `deposited items to bank (${itemCode} [${itemQuantity}])`,
+        );
+        return data as DepositItemResponse;
+      } else {
+        this.logger.error(
+          this.config.getOrThrow('account.prefixes')[character] +
+            'Something went wrong',
+        );
+      }
     } catch (error) {
       this.logger.error(
         this.config.getOrThrow('account.prefixes')[character] + error,
