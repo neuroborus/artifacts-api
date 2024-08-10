@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "declaration": false,
+    "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2022",
-    "sourceMap": false,
+    "target": "esnext",
+    "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "rootDir": "./",
@@ -21,6 +21,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@tests/*": ["./test/*"]
-    }
+    },
+    "include": ["src/**/*", "index.ts"],
+    "exclude": ["node_modules", "src/**/*.spec.ts"]
   }
 }
