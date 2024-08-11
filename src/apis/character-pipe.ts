@@ -14,7 +14,7 @@ export class CharacterPipe implements PipeTransform<string> {
     this.characters =
       this.configService.getOrThrow<string[]>('account.characters');
   }
-  transform(character: string, metadata: ArgumentMetadata) {
+  transform(character: string) {
     if (this.characters.includes(character)) {
       return character;
     }
