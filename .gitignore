@@ -1,5 +1,6 @@
 # data-processors
 /data
+change-script.sh
 
 # compiled output
 /dist
