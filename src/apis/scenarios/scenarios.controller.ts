@@ -1,7 +1,14 @@
-import { Controller, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  SerializeOptions,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ScenariosService } from '@/modules/scenarios';
 import { ScenariosPipe } from './scenarios-pipe';
+import { PositionDto } from '../position.dto';
 
 @Controller('/scenarios')
 @ApiTags('scenarios')
@@ -18,5 +25,11 @@ export class ScenariosController {
   @Post('/bank-all-items')
   bankAllItemsForAll(): Promise<void> {
     return this.service.bankAllItemsForAll();
+  }
+
+  @Post('/move-all')
+  @SerializeOptions({ type: PositionDto })
+  moveForAll(@Body() request: PositionDto): Promise<void> {
+    return this.service.moveForAll(request.posX, request.posY);
   }
 }

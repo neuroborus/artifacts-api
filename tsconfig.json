@@ -21,8 +21,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@tests/*": ["./test/*"]
-    },
-    "include": ["src/**/*", "index.ts"],
-    "exclude": ["node_modules", "src/**/*.spec.ts"]
-  }
+    }
+  },
+  "include": ["src/**/*", "index.ts"],
+  "exclude": ["node_modules", "src/**/*.spec.ts"]
 }

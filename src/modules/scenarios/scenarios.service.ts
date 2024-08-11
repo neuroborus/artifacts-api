@@ -15,14 +15,6 @@ export class ScenariosService {
     this.characterNames = this.config.getOrThrow('account.characters');
   }
 
-  async bankAllItemsForAll(): Promise<void> {
-    const promises: Promise<void>[] = [];
-    for (const character of this.characterNames) {
-      promises.push(this.bankAllItems(character));
-    }
-    await Promise.allSettled(promises);
-  }
-
   async bankAllItems(character: string): Promise<void> {
     const characterData = await this.characters.characterData(character);
     if (!characterData) {
@@ -39,5 +31,17 @@ export class ScenariosService {
     }
 
     this.logger.log(`${this.prefixes[character]}All items banked!`);
+  }
+
+  async bankAllItemsForAll(): Promise<void> {
+    for (const character of this.characterNames) {
+      await this.bankAllItems(character); // todo: use Promise.allSettled
+    }
+  }
+
+  async moveForAll(posX: number, posY: number): Promise<void> {
+    for (const character of this.characterNames) {
+      await this.characters.move(character, posX, posY); // todo: use Promise.allSettled
+    }
   }
 }
