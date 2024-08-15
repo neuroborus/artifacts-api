@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 
 import { ACTIONS_QUEUE_DEFAULTS } from './config-actions-processor';
 import { DATA_QUEUE_DEFAULTS } from './config-data-processor';
+import { CHARACTER_QUEUE_DEFAULTS } from './config-character-processor';
 
 dotenv.config();
 
@@ -33,9 +34,10 @@ export const configuration = () => {
       server,
       headers,
     },
-    processors: {
+    queue: {
       actionsQueueDefaults: ACTIONS_QUEUE_DEFAULTS,
       dataQueueDefaults: DATA_QUEUE_DEFAULTS,
+      characterQueueDefaults: CHARACTER_QUEUE_DEFAULTS,
     },
   };
 };

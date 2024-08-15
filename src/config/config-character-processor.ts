@@ -1,9 +1,7 @@
-const name = 'ActionsQueue';
-const delay = 200;
+const name = 'Character';
 const db = 1;
-export const ACTIONS_QUEUE_DEFAULTS = {
+export const CHARACTER_QUEUE_DEFAULTS = {
   name,
-  delay,
   settings: {
     prefix: `${name}-`,
     stallInterval: 5000,
@@ -20,7 +18,7 @@ export const ACTIONS_QUEUE_DEFAULTS = {
     sendEvents: true,
     storeJobs: true,
     ensureScripts: true,
-    activateDelayedJobs: true,
+    activateDelayedJobs: false,
     removeOnSuccess: true,
     removeOnFailure: true,
     redisScanCount: 100,

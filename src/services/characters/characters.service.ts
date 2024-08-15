@@ -1,7 +1,7 @@
 import { setTimeout } from 'node:timers/promises';
 import { ConfigService } from '@nestjs/config';
 import { Injectable, Logger } from '@nestjs/common';
-import { TasksQueueService } from 'tasks-mad-queue';
+import Queue from 'bee-queue';
 import { ActionsProcessor } from '@/processors/actions-processors';
 import { DataProcessor } from '@/processors/data-processors';
 import {
@@ -13,12 +13,13 @@ import {
 } from '@/entities/artifacts';
 import { ActionsCalls } from '@/calls/actions';
 import { DataCalls } from '@/calls/data';
+import { waitForTask } from '@/helpers/queue';
 
 @Injectable()
 export class CharactersService {
   private readonly logger = new Logger(CharactersService.name);
   constructor(
-    private readonly characterQueues: Record<string, TasksQueueService>,
+    private readonly characterQueues: Record<string, Queue>,
     private readonly actionsProcessor: ActionsProcessor,
     private readonly dataProcessor: DataProcessor,
     private readonly actionsCalls: ActionsCalls,
@@ -51,7 +52,8 @@ export class CharactersService {
 
     let next = true;
     while (next) {
-      next = await this.characterQueues[character].enqueueAndWait<boolean>(
+      next = await waitForTask<boolean>(
+        this.characterQueues[character],
         iteration,
       );
     }
@@ -66,15 +68,13 @@ export class CharactersService {
     character: string,
     call: () => Promise<T | null>,
   ) {
-    return this.characterQueues[character].enqueueAndWait<T | null>(
-      async () => {
-        const result = await this.actionsProcessor.process<T | null>(call);
-        if (result) {
-          await setTimeout(result.cooldown.total_seconds * 1000);
-        }
-        return result;
-      },
-    );
+    return waitForTask<T | null>(this.characterQueues[character], async () => {
+      const result = await this.actionsProcessor.process<T | null>(call);
+      if (result) {
+        await setTimeout(result.cooldown.total_seconds * 1000);
+      }
+      return result;
+    });
   }
 
   ////////////////

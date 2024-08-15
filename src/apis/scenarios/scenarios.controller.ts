@@ -32,4 +32,9 @@ export class ScenariosController {
   moveForAll(@Body() request: PositionDto): Promise<void> {
     return this.service.moveForAll(request.posX, request.posY);
   }
+
+  @Post('/fight-all')
+  fightForAll(): Promise<void> {
+    return this.service.fightForAll();
+  }
 }

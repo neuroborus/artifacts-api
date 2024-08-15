@@ -1,18 +1,14 @@
-import { Logger, Provider } from '@nestjs/common';
+import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TasksQueueService } from 'tasks-mad-queue';
+import * as Queue from 'bee-queue';
 import { ActionsProcessor } from './actions-processor';
 
 export const ActionsProcessorProvider: Provider<ActionsProcessor> = {
   provide: ActionsProcessor,
   async useFactory(config: ConfigService): Promise<ActionsProcessor> {
-    const defaults = config.getOrThrow('processors.actionsQueueDefaults');
-    return new ActionsProcessor(
-      new TasksQueueService({
-        ...defaults,
-        logger: new Logger(defaults.label),
-      }),
-    );
+    const defaults = config.getOrThrow('queue.actionsQueueDefaults');
+    const queue = new Queue(defaults.name, defaults.settings);
+    return new ActionsProcessor(queue, defaults.delay);
   },
   inject: [ConfigService],
 };

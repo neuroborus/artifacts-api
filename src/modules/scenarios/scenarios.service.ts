@@ -23,11 +23,9 @@ export class ScenariosService {
 
     for (const inventoryItem of characterData.inventory) {
       if (!inventoryItem.quantity) continue;
-      await this.characters.depositItem(
-        character,
-        inventoryItem.code,
-        inventoryItem.quantity,
-      );
+      this.characters
+        .depositItem(character, inventoryItem.code, inventoryItem.quantity)
+        .catch((e) => this.logger.error(e));
     }
 
     this.logger.log(`${this.prefixes[character]}All items banked!`);
@@ -35,13 +33,21 @@ export class ScenariosService {
 
   async bankAllItemsForAll(): Promise<void> {
     for (const character of this.characterNames) {
-      await this.bankAllItems(character); // todo: use Promise.allSettled
+      this.bankAllItems(character).catch((e) => this.logger.error(e));
     }
   }
 
   async moveForAll(posX: number, posY: number): Promise<void> {
     for (const character of this.characterNames) {
-      await this.characters.move(character, posX, posY); // todo: use Promise.allSettled
+      this.characters
+        .move(character, posX, posY)
+        .catch((e) => this.logger.error(e));
+    }
+  }
+
+  async fightForAll(): Promise<void> {
+    for (const character of this.characterNames) {
+      this.characters.fight(character, 0).catch((e) => this.logger.error(e));
     }
   }
 }
